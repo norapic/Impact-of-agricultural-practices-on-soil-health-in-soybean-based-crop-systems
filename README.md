@@ -36,4 +36,4 @@ The coordinate data were generated using AI with the `location` column of the da
 The `utils` package contains a module to perform the statistical tests called `comparison_tests` and another module called `descriptive_plots` to create the corresponding plots.
 
 ## 2. Dashboard
-The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries. [![Demo]https://raw.githubusercontent.com/norapic/Impact-of-agricultural-practices-on-soil-health-in-soybean-based-crop-systems/blob/main/thumbnail.png](https://raw.githubusercontent.com/norapic/Impact-of-agricultural-practices-on-soil-health-in-soybean-based-crop-systems/blob/main/demo_app.mp4)
+The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries. [![Demo]https://github.com/norapic/Impact-of-agricultural-practices-on-soil-health-in-soybean-based-crop-systems/blob/main/thumbnail.png](https://github.com/norapic/Impact-of-agricultural-practices-on-soil-health-in-soybean-based-crop-systems/blob/main/demo_app.mp4)
