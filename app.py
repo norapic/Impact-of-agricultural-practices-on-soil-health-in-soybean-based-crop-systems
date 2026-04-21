@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, Input, Output, callback
+from dash import Dash, html, dcc, Input, Output, State, dash_table, callback
 import plotly.express as px
 import pandas as pd
 import openpyxl
@@ -8,7 +8,7 @@ import dash_ag_grid as dag
 from utils.desciptive_plots import *
 from utils.comparison_tests import *
 
-# Load the data
+# Load the data for anamlysis and visualization
 df = pd.read_excel('data/data.xlsx', sheet_name="meta" ,engine='openpyxl')
 coord = pd.read_excel('data/coord.xlsx', engine='openpyxl')
 
@@ -24,7 +24,11 @@ practices = ['soil_order', 'tillage_factor', 'crop_rotation_factor', 'drainage']
 indicators = ['pH', 'OM-LOI', 'STP', 'STK', 'TOC',
        'TC', 'TN', 'WAS', 'Min-C', 'WEOC', 'ACE-N']
 # List of soil types
-soils = ['All', 'Alfisol','Mollisol','Vertisol']
+soils = ['All', 'Alfisol', 'Ultisol','Mollisol','Vertisol']
+
+# Load data for the modal
+df_readme = pd.read_excel('data/data.xlsx', sheet_name="readme" ,engine='openpyxl')
+df_info = df_readme.loc[df_readme['Variables'].isin(practices + indicators), ['Variables', 'Description', 'Unit']]
 
 # Define external stylesheets (optional)
 external_stylesheets = [dbc.themes.CERULEAN]
@@ -62,16 +66,34 @@ app.layout = dbc.Container([
         dbc.Col(
             html.Div([
                 html.H2("Pairwise comparisons", style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
-                html.P("This section allows you to select a practice and an health indicator to visualize the box plot" +
-                    " and the pairwise comparisons table.",
-                    style={'color': 'black', 'fontSize': 14, 'fontStyle': 'italic'})
+                html.P("This section allows you to select a practice and an health indicator to visualize the boxplots" +
+                    " and the pairwise comparisons table. The button 'Details' displays information about the practices and indicators.",
+                    style={'color': 'black', 'fontSize': 14, 'fontStyle': 'italic'}),
+                                dcc.Button("Details", id="open", n_clicks=0),
+                dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("Details abouts practices and indicators")),
+                    dbc.ModalBody(
+                        dash_table.DataTable(
+                            data=df_info.to_dict('records'),
+                            columns=[{"name": i, "id": i} for i in df_info.columns],
+                        )
+                    ),
+                    dbc.ModalFooter(
+                        dbc.Button("Close", id="close", className="ms-auto", n_clicks=0)
+                    ),
+                ],
+                id="modal",
+                size="lg",
+                is_open=False,
+                ),
             ]),
             width=6),
         dbc.Col(
             html.Div([
-            html.H4("Choose practice and indicator for pairwise comparisons", style={'color': 'black', 'fontSize': 18}),
-            dcc.Dropdown(practices, 'tillage_factor', id='practice_dropdown'),
-            dcc.Dropdown(indicators, 'pH', id='indicator_dropdown')
+                html.H4("Choose a practice and an indicator for pairwise comparisons", style={'color': 'black', 'fontSize': 18}),
+                dcc.Dropdown(practices, 'tillage_factor', id='practice_dropdown'),
+                dcc.Dropdown(indicators, 'pH', id='indicator_dropdown')
             ]),
             width=6)
     ]),
@@ -93,7 +115,8 @@ def update_global_figures(soil_choice):
     # Filter the merged dataframe based on the selected soil type
     if soil_choice != 'All':
         dt = df_merged.loc[df_merged['soil_order'] == soil_choice]
-        list_practices = practices[1:] # remove soil_order from the practices list
+        ## remove soil_order from the practices list and keep the ones with more than 1 factor level
+        list_practices = [fact for fact in practices[1:] if len(dt[fact].unique()) > 1]
     else:
         dt = df_merged
         list_practices = practices
@@ -152,11 +175,22 @@ def update_box_plot(soil_choice, practice_choice, indicator_choice):
     pairwaise_res = post_hoc_test(dt, indicator_choice, practice_choice)
     df_pvals = pd.DataFrame(pairwaise_res)
     interp = df_pvals.map(pval_interp)
-    df_pvals.insert(0, 'practice', df_pvals.index)
-    rowData = df_pvals.to_dict('records')
-    columnDefs = [{"field": col} for col in df_pvals.columns]
+    interp.insert(0, 'practice', interp.index)
+    rowData = interp.to_dict('records')
+    columnDefs = [{"field": col} for col in interp.columns]
 
     return fig_box, rowData, columnDefs
+
+# Create a callback for the modal
+@app.callback(
+    Output("modal", "is_open"),
+    [Input("open", "n_clicks"), Input("close", "n_clicks")],
+    [State("modal", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
 
 # Run the app
 if __name__ == '__main__':
