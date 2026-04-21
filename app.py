@@ -31,21 +31,31 @@ df_readme = pd.read_excel('data/data.xlsx', sheet_name="readme" ,engine='openpyx
 df_info = df_readme.loc[df_readme['Variables'].isin(practices + indicators), ['Variables', 'Description', 'Unit']]
 
 # Define external stylesheets (optional)
-external_stylesheets = [dbc.themes.CERULEAN]
+external_stylesheets = [dbc.themes.MINTY]
 
 # Create the Dash app
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Create the layout
 app.layout = dbc.Container([
+    dbc.Row(
+        [
+        html.H2("Impact of agricultural practices on soil health in soybean-based crop systems",
+                    className='text-center',
+                    style={'color': 'darkgreen', 'fontSize': 22, 'fontWeight': 'bold',
+                            'marginBottom': 15},
+                    )
+        ],
+        style={"height": "5vh", 'marginBottom': 20},
+        className='bg-primary text-white font-italic',
+    ),
     dbc.Row([
         html.Div([
-            html.H1("Impact of agricultural practices on soil health in soybean-based crop systems"),
-            html.H2("Global visualization and analysis",
+            html.H3("Global visualization and analysis",
                      style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
             html.P("This section allows you to select a soil type and visualize the map" +
                     " of the locations and the results of the global tests for each practice and health indicator.",
-                    style={'color': 'black', 'fontSize': 14, 'fontStyle': 'italic'}),
+                    style={'color': 'black', 'fontSize': 14}),
             html.H4("Select a soil option :", style={'color': 'black', 'fontSize': 18})
         ])
     ]),
@@ -57,19 +67,10 @@ app.layout = dbc.Container([
     ]),
     dbc.Row([
         dbc.Col(dcc.Graph(id='map_graph'), width=6),
-        dbc.Col(dag.AgGrid(id='global_test_table',
-                        defaultColDef={"filter": True},
-                        columnSize="sizeToFit"),
-                        width=6)
-    ]),
-    dbc.Row([
-        dbc.Col(
-            html.Div([
-                html.H2("Pairwise comparisons", style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
-                html.P("This section allows you to select a practice and an health indicator to visualize the boxplots" +
-                    " and the pairwise comparisons table. The button 'Details' displays information about the practices and indicators.",
-                    style={'color': 'black', 'fontSize': 14, 'fontStyle': 'italic'}),
-                                dcc.Button("Details", id="open", n_clicks=0),
+        dbc.Col(html.Div([
+                html.H4("The button 'Details' displays information about the practices and indicators.",
+                        style={'color': 'black', 'fontSize': 14, 'fontStyle': 'italic'}),
+                dcc.Button("Details", id="open", n_clicks=0),
                 dbc.Modal(
                 [
                     dbc.ModalHeader(dbc.ModalTitle("Details abouts practices and indicators")),
@@ -79,28 +80,48 @@ app.layout = dbc.Container([
                             columns=[{"name": i, "id": i} for i in df_info.columns],
                         )
                     ),
-                    dbc.ModalFooter(
-                        dbc.Button("Close", id="close", className="ms-auto", n_clicks=0)
-                    ),
+                    dbc.ModalFooter(dbc.Button("Close", id="close", className="ms-auto", n_clicks=0)),
                 ],
                 id="modal",
                 size="lg",
                 is_open=False,
                 ),
+                dag.AgGrid(id='global_test_table',
+                            defaultColDef={"filter": True},
+                            columnSize="sizeToFit"),
             ]),
-            width=6),
+            width=6
+        )
+    ],
+    style={'marginBottom': 20},
+    className='bg-light'
+    ),
+    dbc.Row([
         dbc.Col(
             html.Div([
-                html.H4("Choose a practice and an indicator for pairwise comparisons", style={'color': 'black', 'fontSize': 18}),
-                dcc.Dropdown(practices, 'tillage_factor', id='practice_dropdown'),
-                dcc.Dropdown(indicators, 'pH', id='indicator_dropdown')
+                html.H3("Pairwise comparisons", style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
+                html.P("This section allows you to select a practice and an health indicator to visualize the boxplots" +
+                    " and the pairwise comparisons table.",
+                    style={'color': 'black', 'fontSize': 14}),
             ]),
-            width=6)
+            width=6),
     ]),
     dbc.Row([
          dbc.Col(dcc.Graph(id='box_plot'), width=6),
-         dbc.Col(dag.AgGrid(id='pairwise_comparisons_table'), width=6)
-    ])
+         dbc.Col(
+            html.Div([
+            html.H4("Choose a practice and an indicator for pairwise comparisons",
+                         style={'color': 'black', 'fontSize': 14, 'fontStyle': 'italic'}),
+            dcc.Dropdown(practices, 'tillage_factor', id='practice_dropdown'),
+            dcc.Dropdown(indicators, 'pH', id='indicator_dropdown'),
+            dag.AgGrid(id='pairwise_comparisons_table'),
+            ]),
+            width=6
+        )
+    ],
+    style={'marginBottom': 20},
+    className='bg-light'
+    )
 ])
 
 # Create a callback for global viasualization and analysis
