@@ -4,8 +4,8 @@ import scipy.stats as stats
 import scikit_posthocs as sp
 
 def global_test(df, trait, factor):
-    """ Perform a global test (Anova or Kruskal-Wallis) to compare the trait of interest between
-    the different groups of the factor of interest"""
+    """ Perform a global test (Anova or Kruskal-Wallis) test if the trait of interest
+    is significantly different between the different groups of the factor of interest """
     ## Results to return
     res = {}
     ## Shapiro : Null hypothesis : The weights were drawn from a normal distribution
