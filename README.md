@@ -67,6 +67,7 @@ The coordinate data were generated using AI with the `location` column of the da
 The `utils` package contains two modules:
 * `comparison_tests` : Performs statistical tests
 * `descriptive_plots`: Generates visuals
+
 The statistical tests are carried out as follows :
 * Step 1 : test whether there is an effect of each practice on the considered indicators
 * Step 2 : compare the each levels of the practice (ex: for drainage it will be 'yes' and 'no') for each considered indicator
