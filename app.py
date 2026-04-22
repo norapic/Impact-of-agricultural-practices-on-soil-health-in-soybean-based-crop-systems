@@ -56,7 +56,7 @@ app.layout = dbc.Container([
             html.P("This section allows you to select a soil type and visualize the map" +
                     " of the locations and the results of the global tests for each practice and health indicator.",
                     style={'color': 'black', 'fontSize': 14}),
-            html.H4("Select a soil option :", style={'color': 'black', 'fontSize': 18})
+            html.H4("Select a soil order :", style={'color': 'black', 'fontSize': 18})
         ])
     ]),
     dbc.Row([
@@ -151,7 +151,8 @@ def update_global_figures(soil_choice):
         hover_name='location',
     )
     fig_map.update_layout(
-        title = f"Map of soils: {soil_choice}",
+        title = f"Map of experiments for {soil_choice} soil order",
+        title_subtitle = {'text' : f"{len(dt)} data points", 'font': {'style': 'italic'}},
         geo = dict(
             scope = 'usa',
             landcolor = 'rgb(217, 217, 217)')

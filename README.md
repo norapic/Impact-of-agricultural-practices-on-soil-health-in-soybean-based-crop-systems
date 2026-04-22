@@ -1,20 +1,17 @@
 This project is meant to showcase a simple dashboard using Python, synthesizing the analysis of different agricultural practices on soil health in soybean-based crop systems accross different soil orders.
 
 # Description
-In this project, we use several statistical tests to compare the impact of practices on soil health across different soil orders.
+The study from which this project is based (see details in Resources) investigates whether management practices are associated with changes in recommended soil health indicators at the 0–15 cm depth in 4 to 50 year soybean cropping system trials across the US. There has been 21 experiements included in the study across 17 locations in the US.
 
-The study from which this project is based (see details in Ressources) investigates whether management practices are associated with changes in recommended soil health indicators at the 0–15 cm depth in 4 to 50 year soybean cropping system trials across the US. There has been 21 experiements included in the study across 17 locations in the US.
+The soil health indicators included were : wet aggregate stability (WAS), permanganate oxidizable carbon (POXC), organic matter loss-on-ignition (OM-LOI), mineralizable carbon (Min-C), water extractable organic carbon (WEOC), total organic carbon (TOC), soil extractable protein (ACE-N), total nitrogen (TN), pH, soil test phosphorus (STP), and soil test potassium (STK)
 
-The Soil indicators included were : wet aggregate stability (WAS), permanganate oxidizable carbon (POXC), organic matter loss-on-ignition (OM-LOI), mineralizable carbon (Min-C), water extractable organic carbon (WEOC), total organic carbon (TOC), soil extractable protein (ACE-N), total nitrogen (TN), pH, soil test phosphorus (STP), and soil test potassium (STK)
-
-The practices evaluated were:
+The management practices evaluated were:
 * crop rotation
 * tillage
 * cover cropping
-* artificial drainage.
+* artificial drainage
 
-The study compare the effect on each practice levels for each indicator using marginal means. They found out for:
-
+The study compare the effect on each practice levels for each indicator. They found out the following results:
 * crop rotation : two-crop rotations were associated with greater soil 
 test phosphorus (STP) values
 * tillage : no-tillage resulted in more acidic 
@@ -23,9 +20,7 @@ pH compared to conventional tillage
 soil
 * artificial drainage : no significant differences between tile-drained and undrained treatments for any of the indicators
 
-As suggested in the conclusion of the study, this project carry analysis across specific soil conditions (soil order), to get a more comprehensive soil health assessment.
-
-The results of these tests, along with the corresponding visuals, are displayed in the dashboard.
+As suggested in the conclusion of the study, this project carry analysis across specific soil conditions (soil order), to get a more comprehensive soil health assessment. We use several statistical tests to compare the impact of practices on soil health across different soil orders. The results of these tests, along with the corresponding visuals, are displayed in the dashboard.
 
 # Usage
 * 1/ Install Dash et plotly
