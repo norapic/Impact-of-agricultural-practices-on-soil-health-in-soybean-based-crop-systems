@@ -3,9 +3,9 @@ This project is meant to showcase a simple dashboard using Python, synthesizing 
 # Description
 The study from which this project is based on (see Resources) investigates whether management practices are associated with changes in recommended soil health indicators at the 0–15 cm depth in 4 to 50 year soybean cropping system trials across the US. A total of **21 experiements** were included in the study across 17 locations in the US.
 
-## Soil Health Indicators
+## Soil health indicators
 
-The project tracks :
+The study tracks :
   * **Chemical/Physical** : pH, organic matter loss-on-ignition (OM-LOI), total nitrogen (TN), soil test phosphorus (STP), and soil test potassium (STK).
   * **Biological/Carbon** : Wet aggregate stability (WAS), permanganate oxidizable carbon (POXC), mineralizable carbon (Min-C), water extractable organic carbon (WEOC), total organic carbon (TOC), and soil extractable protein (ACE-N).
 
