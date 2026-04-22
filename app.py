@@ -19,7 +19,7 @@ df.loc[df['crop_rotation_factor'] == "2 crops ", 'crop_rotation_factor'] ='2 cro
 df_merged = pd.merge(df, coord, on='location', how='left')
 
 # List of practices to compare
-practices = ['soil_order', 'tillage_factor', 'crop_rotation_factor', 'drainage']
+practices = ['soil_order', 'tillage_factor', 'crop_rotation_factor', 'drainage', 'cover_crop']
 # List of indicators to compare
 indicators = ['pH', 'OM-LOI', 'STP', 'STK', 'TOC',
        'TC', 'TN', 'WAS', 'Min-C', 'WEOC', 'ACE-N']
