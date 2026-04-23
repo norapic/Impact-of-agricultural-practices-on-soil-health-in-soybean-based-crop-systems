@@ -53,8 +53,11 @@ app.layout = dbc.Container([
         html.Div([
             html.H3("Global visualization and analysis",
                      style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
-            html.P("This section allows you to select a soil type and visualize the map" +
-                    " of the locations and the results of the global tests for each practice and health indicator.",
+            html.P("In this section, the map indicates the locations of the experiments depending the soil order you choose. " +
+                   "The sutitle in italic indicates the number of data points in your dataset after it has been filtered " +
+                   "on the soil order. The table indicates the results of the tests for the effect of each " +
+                    "practice on the each soil health indicator. The test is either an ANOVA or a Kruskal-Wallis test " +
+                    "depending on the normality of the data.",
                     style={'color': 'black', 'fontSize': 14}),
             html.H4("Select a soil order :", style={'color': 'black', 'fontSize': 18})
         ])
@@ -100,8 +103,10 @@ app.layout = dbc.Container([
         dbc.Col(
             html.Div([
                 html.H3("Pairwise comparisons", style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
-                html.P("This section allows you to select a practice and an health indicator to visualize the boxplots" +
-                    " and the pairwise comparisons table.",
+                html.P("In this section, we compare the distributions of a chosen indicator, " +
+                    "for each level of a chosen practice. The boxplots display those distributions " +
+                    "The table displays the results of the pairwise comparisons. The test is either a " +
+                    "Tukey HSD or a Dunn test depending on the normality of the data.",
                     style={'color': 'black', 'fontSize': 14}),
             ]),
             width=6),

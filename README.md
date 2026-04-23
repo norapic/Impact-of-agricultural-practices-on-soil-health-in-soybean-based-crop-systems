@@ -20,7 +20,7 @@ soil
 * **Artificial drainage** : no significant differences between tile-drained and undrained treatments for any of the indicators
 
 ## Goal of the project
-As suggested in the conclusion of the study, this project extends the analysis across specific soil conditions (soil order), to get a more comprehensive soil health assessment. We use several statistical tests to compare the impact of practices on soil health across different **soil orders**. The results of these tests, along with the corresponding visuals, are displayed in the dashboard.
+As suggested in the conclusion of the study, this project extends the analysis across specific regions and soil conditions (soil order), to get a more comprehensive soil health assessment. We use several statistical tests to compare the impact of practices on soil health across different **soil orders**. The results of these tests, along with the corresponding visuals, are displayed in the dashboard.
 
 # Usage
 1. Install dependencies
@@ -63,7 +63,7 @@ The data used are from the **study:** https://doi.org/10.1016/j.agee.2025.109950
 The coordinate data were generated using AI with the `location` column of the data file as input and manually checked for accuracy.
 
 # Analysis
-## 1. Statistics and visualization
+## Statistics and visualization
 The `utils` package contains two modules:
 * `comparison_tests` : Performs statistical tests
 * `descriptive_plots`: Generates visuals
@@ -78,5 +78,10 @@ The p-value is interpreted with the following convention :
   - `*`: p <= 0.05 and p > 0.01
   - `ns` : not significant (p > 0.05)
 
-## 2. Dashboard
+## Dashboard
 The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries. ![Demo](https://github.com/norapic/Impact-of-agricultural-practices-on-soil-health-in-soybean-based-crop-systems/blob/main/demo.gif)
+
+## Interpretations
+In the global tests section, while analysing all soils order, the factor 'soil_order' is also added to the Practice column in order to see if it has an effect on any indicator. The test reveals that it indeed has a significant effect of all soil health indicators except wet aggregate stability (WAS), which isn't significant for any other factors. This confirms that the analysis by soil order is relevant.
+
+
