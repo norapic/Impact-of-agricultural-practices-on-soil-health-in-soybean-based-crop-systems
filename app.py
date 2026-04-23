@@ -54,9 +54,11 @@ app.layout = dbc.Container([
             html.H3("Global visualization and analysis",
                      style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
             html.P("In this section, the map indicates the locations of the experiments depending the soil order you choose. " +
-                   "The sutitle in italic indicates the number of data points in your dataset after it has been filtered " +
-                   "on the soil order. The table indicates the results of the tests for the effect of each " +
-                    "practice on the each soil health indicator. The test is either an ANOVA or a Kruskal-Wallis test " +
+                   "The sutitle in italic indicates the number of experiments and data points in your dataset after it has been filtered " +
+                   "on soil order. The table indicates the results of the tests for the effect of each " +
+                    "practice on the each soil health indicator and another factor highlighted in grey : soil_order. " +
+                    "This factor was added to test its effect on the indicators. " +
+                    "The test is either an ANOVA or a Kruskal-Wallis test " +
                     "depending on the normality of the data.",
                     style={'color': 'black', 'fontSize': 14}),
             html.H4("Select a soil order :", style={'color': 'black', 'fontSize': 18})
@@ -91,7 +93,18 @@ app.layout = dbc.Container([
                 ),
                 dag.AgGrid(id='global_test_table',
                             defaultColDef={"filter": True},
-                            columnSize="sizeToFit"),
+                            columnSize="sizeToFit",
+                            dashGridOptions={
+                                "getRowStyle": {
+                                    "styleConditions": [
+                                        {
+                                    "condition": "params.data.Factor === 'soil_order' ",
+                                    "style": {"backgroundColor": "rgb(220, 220, 220)"},
+                                        },
+                                    ]
+                                }
+                            },
+                ),
             ]),
             width=6
         )
@@ -157,7 +170,8 @@ def update_global_figures(soil_choice):
     )
     fig_map.update_layout(
         title = f"Map of experiments for {soil_choice} soil order",
-        title_subtitle = {'text' : f"{len(dt)} data points", 'font': {'style': 'italic'}},
+        title_subtitle = {'text' : f"{len(dt.site_number.unique())} experiments, {len(dt)} data points",
+                        'font': {'style': 'italic'}},
         geo = dict(
             scope = 'usa',
             landcolor = 'rgb(217, 217, 217)')
@@ -173,7 +187,7 @@ def update_global_figures(soil_choice):
             pval = global_test(dt, indic, pract)["pvalue"]
             interp = pval_interp(pval)
             df_res.loc[pract, indic] = interp
-    df_res.insert(0, 'Practice', df_res.index)
+    df_res.insert(0, 'Factor', df_res.index)
     rowData = df_res.to_dict('records')
     columnDefs = [{"field": col} for col in df_res.columns]
 
@@ -202,7 +216,7 @@ def update_box_plot(soil_choice, practice_choice, indicator_choice):
     pairwaise_res = post_hoc_test(dt, indicator_choice, practice_choice)
     df_pvals = pd.DataFrame(pairwaise_res)
     interp = df_pvals.map(pval_interp)
-    interp.insert(0, 'practice', interp.index)
+    interp.insert(0, 'Factor', interp.index)
     rowData = interp.to_dict('records')
     columnDefs = [{"field": col} for col in interp.columns]
 
