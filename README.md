@@ -85,3 +85,4 @@ The p-value is interpreted with the following convention :
 ## Dashboard
 The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries. ![Demo](https://github.com/norapic/Impact-of-agricultural-practices-on-soil-health-in-soybean-based-crop-systems/blob/main/demo.gif)
 
+## Interpretations

@@ -52,7 +52,7 @@ def post_hoc_test(df, trait, factor):
 
     barlett_test = stats.bartlett(*list_inputs) #En Python, * devant une liste signifie "déballer" cette liste en arguments séparés.
 
-    ## Global test : Anova or Krukal-Wallis
+    ## Post-hoc test : Tukey or Dunn
     if (shapiro_test.pvalue <= 0.05) and (barlett_test.pvalue <= 0.05):
         # Dunn test
         dunn_test = sp.posthoc_dunn(df, val_col=trait, group_col=factor, p_adjust='bonferroni')

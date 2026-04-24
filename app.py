@@ -14,7 +14,7 @@ coord = pd.read_excel('data/coord.xlsx', engine='openpyxl')
 
 # Clean and transform the data
 coord.columns = ['location', 'latitude', 'longitude']
-df.loc[df['crop_rotation_factor'] == "Single-crop", 'crop_rotation_factor'] = '1 crops'
+df.loc[df['crop_rotation_factor'] == "Single-crop", 'crop_rotation_factor'] = '1 crop'
 df.loc[df['crop_rotation_factor'] == "2 crops ", 'crop_rotation_factor'] ='2 crops'
 df_merged = pd.merge(df, coord, on='location', how='left')
 
@@ -51,13 +51,12 @@ app.layout = dbc.Container([
     ),
     dbc.Row([
         html.Div([
-            html.H3("Global visualization and analysis",
+            html.H3("What factor has an effect soil's health ?",
                      style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
             html.P("In this section, the map indicates the locations of the experiments depending the soil order you choose. " +
                    "The sutitle in italic indicates the number of experiments and data points in your dataset after it has been filtered " +
                    "on soil order. The table indicates the results of the tests for the effect of each " +
-                    "practice on the each soil health indicator and another factor highlighted in grey : soil_order. " +
-                    "This factor was added to test its effect on the indicators. " +
+                    "practice on the each soil health indicator and other factors factor highlighted in grey (site_number, rep, etc.). " +
                     "The test is either an ANOVA or a Kruskal-Wallis test " +
                     "depending on the normality of the data.",
                     style={'color': 'black', 'fontSize': 14}),
