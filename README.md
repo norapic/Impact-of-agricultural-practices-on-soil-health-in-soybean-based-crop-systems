@@ -1,4 +1,4 @@
-This project is meant to showcase a simple dashboard using Python, synthesizing the analysis of different agricultural practices on soil health in soybean-based crop systems across different soil orders.
+This project is meant to showcase a simple dashboard using Python, synthesizing the exploratory analysis of different agricultural practices on soil health in soybean-based crop systems across different soil and regional conditions in the US.
 
 # Description
 The study from which this project is based on (see Resources) investigates whether management practices are associated with changes in recommended soil health indicators at the 0–15 cm depth in 4 to 50 year soybean cropping system trials across the US. A total of **21 experiements** were included in the study across 17 locations in the US.
@@ -20,9 +20,7 @@ soil
 * **Artificial drainage** : no significant differences between tile-drained and undrained treatments for any of the indicators
 
 ## Goal of the project
-As suggested in the conclusion of the study, this project extends the analysis across specific regions and soil conditions (soil order), to get a more comprehensive soil health assessment. We use several statistical tests to compare the impact of practices on soil health across different **soil orders**. Soil order characterize the he unique physical, chemical, and biological properties found within a soil layers
-
-The results of these tests, along with the corresponding visuals, are displayed in the dashboard.
+As suggested in the conclusion of the study, this project extends the analysis across specific regions and soil conditions (soil order), to get a more comprehensive soil health assessment. 
 
 # Usage
 1. Install dependencies
@@ -66,23 +64,5 @@ The coordinate data were generated using AI with the `location` column of the da
 
 For interpretations, the usda soil taxonomy is used as **reference** https://www.nrcs.usda.gov/resources/education-and-teaching-materials/the-twelve-orders-of-soil-taxonomy
 
-# Analysis
-## Statistics and visualization
-The `utils` package contains two modules:
-* `comparison_tests` : Performs statistical tests
-* `descriptive_plots`: Generates visuals
-
-The statistical tests are carried out as follows :
-* Step 1 : test whether there is an effect of each practice on the considered indicators
-* Step 2 : compare the each levels of the practice (ex: for drainage it will be 'yes' and 'no') for each considered indicator
-
-The p-value is interpreted with the following convention :
-  - `***` : p <= 0.001
-  - `**`: p <= 0.01 and p > 0.001
-  - `*`: p <= 0.05 and p > 0.01
-  - `ns` : not significant (p > 0.05)
-
 ## Dashboard
-The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries. ![Demo](https://github.com/norapic/Impact-of-agricultural-practices-on-soil-health-in-soybean-based-crop-systems/blob/main/demo.gif)
-
-## Interpretations
+The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries.
