@@ -83,7 +83,8 @@ app.layout = dbc.Container([
                 scrollable=True,
                 ),
             html.P(" - The map on the left shows the location of the sites having the same practices, " +
-                    "colored depending on regional or soil conditions factor (soil order, soil texture type and state where the site is located)"),
+                    "colored depending on regional or soil conditions factor (soil order, soil texture type and state where the site is located)" +
+                    " and with a size depending on the value of the selected indicator."),
             html.P(" - The boxplot on the right shows the distribution of the selected indicator depending on the regional or soil " + 
                 "condition factor."),
         ])
@@ -153,6 +154,7 @@ def update_global_figures(condition_choice, practice_choice, indicator_choice):
         locationmode='USA-states',
         hover_name='location',
         color=condition_choice,
+        size = indicator_choice
     )
     list_practices = practice_choice.split("_")
     fig_map.update_layout(
