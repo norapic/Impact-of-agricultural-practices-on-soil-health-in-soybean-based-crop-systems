@@ -17,18 +17,25 @@ coord.columns = ['location', 'latitude', 'longitude']
 df.loc[df['crop_rotation_factor'] == "Single-crop", 'crop_rotation_factor'] = '1 crop'
 df.loc[df['crop_rotation_factor'] == "2 crops ", 'crop_rotation_factor'] ='2 crops'
 df_merged = pd.merge(df, coord, on='location', how='left')
+df_merged.columns = [col.replace('-', '_') for col in df_merged.columns]
 
 # List of practices to compare
-practices = ['soil_order', 'tillage_factor', 'crop_rotation_factor', 'drainage', 'cover_crop']
+practices = ['tillage_factor', 'crop_rotation_factor', 'drainage', 'cover_crop']
 # List of indicators to compare
-indicators = ['pH', 'OM-LOI', 'STP', 'STK', 'TOC',
-       'TC', 'TN', 'WAS', 'Min-C', 'WEOC', 'ACE-N']
-# List of soil types
-soils = ['All', 'Alfisol', 'Ultisol','Mollisol','Vertisol']
+indicators = ['pH', 'OM_LOI', 'STP', 'STK', 'TOC',
+       'TC', 'TN', 'POX_C', 'WAS', 'Min_C', 'WEOC', 'ACE_N']
+# List of condition factors
+conditions = ['soil_order', 'texture_class', 'state']
+# List of factors to add
+factors_to_add = ['site_number', 'rep']
+
+# Add a columns with the combination of practices for each data point
+df_merged['practices'] = df_merged[practices].apply(lambda row: '_'.join(row.values.astype(str)), axis=1)
 
 # Load data for the modal
 df_readme = pd.read_excel('data/data.xlsx', sheet_name="readme" ,engine='openpyxl')
-df_info = df_readme.loc[df_readme['Variables'].isin(practices + indicators), ['Variables', 'Description', 'Unit']]
+df_readme.Variables = [col.replace('-', '_') for col in df_readme.Variables]
+df_info = df_readme.loc[df_readme['Variables'].isin(practices + conditions + indicators), ['Variables', 'Description', 'Unit']]
 
 # Define external stylesheets (optional)
 external_stylesheets = [dbc.themes.MINTY]
@@ -40,7 +47,7 @@ app = Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = dbc.Container([
     dbc.Row(
         [
-        html.H2("Impact of agricultural practices on soil health in soybean-based crop systems",
+        html.H2("Exploration of the impact of practices on soil indicators in soybean cropping systems in the US",
                     className='text-center',
                     style={'color': 'darkgreen', 'fontSize': 22, 'fontWeight': 'bold',
                             'marginBottom': 15},
@@ -50,34 +57,18 @@ app.layout = dbc.Container([
         className='bg-primary text-white font-italic',
     ),
     dbc.Row([
+        html.H2("The figures below allow to explore the impact of differents agricultural practices on soil " +
+                " indicators in soybean cropping systems in the US.",
+                style={'color': 'black', 'fontSize': 19},
+        ),
         html.Div([
-            html.H3("What factor has an effect soil's health ?",
-                     style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
-            html.P("In this section, the map indicates the locations of the experiments depending the soil order you choose. " +
-                   "The sutitle in italic indicates the number of experiments and data points in your dataset after it has been filtered " +
-                   "on soil order. The table indicates the results of the tests for the effect of each " +
-                    "practice on the each soil health indicator and other factors factor highlighted in grey (site_number, rep, etc.). " +
-                    "The test is either an ANOVA or a Kruskal-Wallis test " +
-                    "depending on the normality of the data.",
-                    style={'color': 'black', 'fontSize': 14}),
-            html.H4("Select a soil order :", style={'color': 'black', 'fontSize': 18})
-        ])
-    ]),
-    dbc.Row([
-        dcc.RadioItems(options= soils,
-                    value = 'All',
-                    inline=True,
-                    id = 'soil_selector',)
-    ]),
-    dbc.Row([
-        dbc.Col(dcc.Graph(id='map_graph'), width=6),
-        dbc.Col(html.Div([
-                html.H4("The button 'Details' displays information about the practices and indicators.",
-                        style={'color': 'black', 'fontSize': 14, 'fontStyle': 'italic'}),
-                dcc.Button("Details", id="open", n_clicks=0),
+            html.H4("Practices are displayed are discribed as follow : Tillage_Crop rotation_Drainage_Cover crop.\n" +
+                    "See `Details` button for more information",
+                    style={'color': 'black', 'fontSize': 15},),
+            dcc.Button("Details", id="open", n_clicks=0),
                 dbc.Modal(
                 [
-                    dbc.ModalHeader(dbc.ModalTitle("Details abouts practices and indicators")),
+                    dbc.ModalHeader(dbc.ModalTitle("Information")),
                     dbc.ModalBody(
                         dash_table.DataTable(
                             data=df_info.to_dict('records'),
@@ -87,77 +78,72 @@ app.layout = dbc.Container([
                     dbc.ModalFooter(dbc.Button("Close", id="close", className="ms-auto", n_clicks=0)),
                 ],
                 id="modal",
-                size="lg",
+                size="xl",
                 is_open=False,
+                scrollable=True,
                 ),
-                dag.AgGrid(id='global_test_table',
-                            defaultColDef={"filter": True},
-                            columnSize="sizeToFit",
-                            dashGridOptions={
-                                "getRowStyle": {
-                                    "styleConditions": [
-                                        {
-                                    "condition": "params.data.Factor === 'soil_order' ",
-                                    "style": {"backgroundColor": "rgb(220, 220, 220)"},
-                                        },
-                                    ]
-                                }
-                            },
-                ),
-            ]),
-            width=6
-        )
-    ],
-    style={'marginBottom': 20},
-    className='bg-light'
+            html.P(" - The map on the left shows the location of the sites having the same practices, " +
+                    "colored depending on regional or soil conditions factor (soil order, soil texture type and state where the site is located)"),
+            html.P(" - The boxplot on the right shows the distribution of the selected indicator depending on the regional or soil " + 
+                "condition factor."),
+        ])
+        ],
+        style={'marginBottom': 10},
+        className='bg-light'
     ),
     dbc.Row([
         dbc.Col(
-            html.Div([
-                html.H3("Pairwise comparisons", style={'color': 'green', 'fontSize': 24, 'fontWeight': 'bold'}),
-                html.P("In this section, we compare the distributions of a chosen indicator, " +
-                    "for each level of a chosen practice. The boxplots display those distributions " +
-                    "The table displays the results of the pairwise comparisons. The test is either a " +
-                    "Tukey HSD or a Dunn test depending on the normality of the data.",
-                    style={'color': 'black', 'fontSize': 14}),
-            ]),
-            width=6),
-    ]),
+            dcc.Dropdown(
+                id='practices_selector',
+                options=[{"label": v, "value": v} for v in np.sort(df_merged['practices'].unique())],
+                placeholder="Select practice"
+            ),
+            width=3
+            ),
+        dbc.Col(
+            dcc.Dropdown(
+                id='conditions_selector',
+                options=[{"label": v, "value": v} for v in conditions],
+                placeholder="Select condition"
+            ),
+            width=3
+        ),
+        dbc.Col(
+            dcc.Dropdown(
+                id='indicators_selector',
+                options=[{"label": v, "value": v} for v in indicators],
+                placeholder="Select indicator"
+            ),
+            width=3
+        ),
+        ],
+        style={'marginBottom': 20},
+        className='bg-light'
+    ),
     dbc.Row([
-         dbc.Col(dcc.Graph(id='box_plot'), width=6),
-         dbc.Col(
-            html.Div([
-            html.H4("Choose a practice and an indicator for pairwise comparisons",
-                         style={'color': 'black', 'fontSize': 14, 'fontStyle': 'italic'}),
-            dcc.Dropdown(practices, 'tillage_factor', id='practice_dropdown'),
-            dcc.Dropdown(indicators, 'pH', id='indicator_dropdown'),
-            dag.AgGrid(id='pairwise_comparisons_table'),
-            ]),
-            width=6
-        )
-    ],
-    style={'marginBottom': 20},
-    className='bg-light'
-    )
+        dbc.Col(dcc.Graph(id='map_graph'), width=6),
+        dbc.Col(dcc.Graph(id='boxplot_soil'), width=6),
+        ],
+        style={'marginBottom': 20},
+        className='bg-light'
+    ),
 ])
 
 # Create a callback for global viasualization and analysis
 @app.callback(
     Output('map_graph', 'figure'),
-    Output('global_test_table', 'rowData'),
-    Output('global_test_table', 'columnDefs'),
-    Output('practice_dropdown', 'options'),
-    Input('soil_selector', 'value'),
+    Output('boxplot_soil', 'figure'),
+    Input('conditions_selector', 'value'),
+    Input('practices_selector', 'value'),
+    Input('indicators_selector', 'value'),
 )
-def update_global_figures(soil_choice):
-    # Filter the merged dataframe based on the selected soil type
-    if soil_choice != 'All':
-        dt = df_merged.loc[df_merged['soil_order'] == soil_choice]
-        ## remove soil_order from the practices list and keep the ones with more than 1 factor level
-        list_practices = [fact for fact in practices[1:] if len(dt[fact].unique()) > 1]
-    else:
-        dt = df_merged
-        list_practices = practices
+def update_global_figures(condition_choice, practice_choice, indicator_choice):
+    # Return empty figures if any dropdown value is not selected yet
+    if condition_choice is None or practice_choice is None or indicator_choice is None:
+        return go.Figure(), go.Figure()
+
+    # Filter the merged dataframe based on the selected practice
+    dt = df_merged.loc[df_merged['practices'] == practice_choice]
 
     # Update the map
     fig_map = px.scatter_geo(
@@ -166,10 +152,15 @@ def update_global_figures(soil_choice):
         lon='longitude',
         locationmode='USA-states',
         hover_name='location',
+        color=condition_choice,
     )
+    list_practices = practice_choice.split("_")
     fig_map.update_layout(
-        title = f"Map of experiments for {soil_choice} soil order",
-        title_subtitle = {'text' : f"{len(dt.site_number.unique())} experiments, {len(dt)} data points",
+        title = f"Map of the {len(dt.site_number.unique())} sites colored depending on {condition_choice} practicing : ",
+        title_subtitle = {'text' : f"Tillage : " + list_practices[0] + "<br>" +
+                          "Crop rotation : " + list_practices[1] + "<br>" +
+                          "Drainage : " + list_practices[2] + "<br>" +
+                          "Cover crop : " + list_practices[3],
                         'font': {'style': 'italic'}},
         geo = dict(
             scope = 'usa',
@@ -179,47 +170,12 @@ def update_global_figures(soil_choice):
         showlegend=False
     )
 
-    # Update the global test table
-    df_res = pd.DataFrame(columns= indicators, index=list_practices)
-    for pract in list_practices:
-        for indic in indicators:
-            pval = global_test(dt, indic, pract)["pvalue"]
-            interp = pval_interp(pval)
-            df_res.loc[pract, indic] = interp
-    df_res.insert(0, 'Factor', df_res.index)
-    rowData = df_res.to_dict('records')
-    columnDefs = [{"field": col} for col in df_res.columns]
-
-    return fig_map, rowData, columnDefs, list_practices
-
-# Create a callback for boxplots and pairwise comparison
-@app.callback(
-    Output('box_plot', 'figure'),
-    Output('pairwise_comparisons_table', 'rowData'),
-    Output('pairwise_comparisons_table', 'columnDefs'),
-    Input('soil_selector', 'value'),
-    Input('practice_dropdown', 'value'),
-    Input('indicator_dropdown', 'value'),
-    prevent_initial_call=False
-)
-def update_box_plot(soil_choice, practice_choice, indicator_choice):
-    if soil_choice != 'All':
-        dt = df_merged.loc[df_merged['soil_order'] == soil_choice]
-    else:
-        dt = df_merged
+    # Update the boxplot
+    fig_box = px.box(dt, y=indicator_choice, x=condition_choice,
+                      title=f"{indicator_choice} depending on {condition_choice}",
+                      color=condition_choice)
     
-    # update the box plot
-    fig_box = boxplots_trait_factor(dt, indicator_choice, practice_choice)
-
-    # update the pairwise comparisons table
-    pairwaise_res = post_hoc_test(dt, indicator_choice, practice_choice)
-    df_pvals = pd.DataFrame(pairwaise_res)
-    interp = df_pvals.map(pval_interp)
-    interp.insert(0, 'Factor', interp.index)
-    rowData = interp.to_dict('records')
-    columnDefs = [{"field": col} for col in interp.columns]
-
-    return fig_box, rowData, columnDefs
+    return fig_map, fig_box
 
 # Create a callback for the modal
 @app.callback(
