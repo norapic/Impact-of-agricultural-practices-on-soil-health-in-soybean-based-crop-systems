@@ -34,8 +34,3 @@ def fit_generalized_linear_model(df, trait, fixed_effects, random_effects, famil
     results = glm_model.fit()
     
     return results
-
-def test_normality_residuals(residuals):
-    """ Test the normality of the residuals of a model using the Shapiro-Wilk test """
-    shapiro_test = stats.shapiro(residuals)
-    return shapiro_test

@@ -26,8 +26,6 @@ indicators = ['pH', 'OM_LOI', 'STP', 'STK', 'TOC',
        'TC', 'TN', 'POX_C', 'WAS', 'Min_C', 'WEOC', 'ACE_N']
 # List of condition factors
 conditions = ['soil_order', 'texture_class', 'state']
-# List of factors to add
-factors_to_add = ['site_number', 'rep']
 
 # Add a columns with the combination of practices for each data point
 df_merged['practices'] = df_merged[practices].apply(lambda row: '_'.join(row.values.astype(str)), axis=1)
@@ -62,7 +60,7 @@ app.layout = dbc.Container([
                 style={'color': 'black', 'fontSize': 19},
         ),
         html.Div([
-            html.H4("Practices are displayed are discribed as follow : Tillage_Crop rotation_Drainage_Cover crop.\n" +
+            html.H4("Practices are displayed are discribed as follow : Tillage_Crop rotation_Drainage_Cover crop." +
                     "See `Details` button for more information",
                     style={'color': 'black', 'fontSize': 15},),
             dcc.Button("Details", id="open", n_clicks=0),
@@ -83,10 +81,11 @@ app.layout = dbc.Container([
                 scrollable=True,
                 ),
             html.P(" - The map on the left shows the location of the sites having the same practices, " +
-                    "colored depending on regional or soil conditions factor (soil order, soil texture type and state where the site is located)" +
+                    "colored depending on regional or soil conditions factor (soil order, soil texture " +
+                    "type and state where the site is located)" +
                     " and with a size depending on the value of the selected indicator."),
-            html.P(" - The boxplot on the right shows the distribution of the selected indicator depending on the regional or soil " + 
-                "condition factor."),
+            html.P(" - The boxplot on the right shows the distribution of the selected indicator depending on " + 
+                "the regional or soil condition factor."),
         ])
         ],
         style={'marginBottom': 10},
@@ -158,7 +157,8 @@ def update_global_figures(condition_choice, practice_choice, indicator_choice):
     )
     list_practices = practice_choice.split("_")
     fig_map.update_layout(
-        title = f"Map of the {len(dt.site_number.unique())} sites colored depending on {condition_choice} practicing : ",
+        title = f"Map of the {len(dt.site_number.unique())} sites colored " +
+        f"depending on {condition_choice} practicing : ",
         title_subtitle = {'text' : f"Tillage : " + list_practices[0] + "<br>" +
                           "Crop rotation : " + list_practices[1] + "<br>" +
                           "Drainage : " + list_practices[2] + "<br>" +
