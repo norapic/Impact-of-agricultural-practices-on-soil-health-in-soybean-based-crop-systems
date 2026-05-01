@@ -9,18 +9,14 @@ The study tracks :
   * **Chemical/Physical** : pH, organic matter loss-on-ignition (OM-LOI), total nitrogen (TN), soil test phosphorus (STP), and soil test potassium (STK).
   * **Biological/Carbon** : Wet aggregate stability (WAS), permanganate oxidizable carbon (POXC), mineralizable carbon (Min-C), water extractable organic carbon (WEOC), total organic carbon (TOC), and soil extractable protein (ACE-N).
 
-## Management practices & findings
-The study compare the effect on each practice levels for each indicator. They found out the following results:
-* **Crop rotation** : two-crop rotations were associated with greater soil 
-test phosphorus (STP) values
-* **Tillage** : no-tillage resulted in more acidic 
-pH compared to conventional tillage
-* **Cover cropping** : associated with greater mineralizable carbon (Min-C) and water extractable organic carbon (WEOC), indicating improved biological activity and labile carbon pools in the 
-soil
-* **Artificial drainage** : no significant differences between tile-drained and undrained treatments for any of the indicators
+## Management practices
+* **Crop rotation**
+* **Tillage**
+* **Cover cropping**
+* **Artificial drainage**
 
 ## Goal of the project
-As suggested in the conclusion of the study, this project extends the analysis across specific regions and soil conditions (soil order), to get a more comprehensive soil health assessment. 
+As suggested in the conclusion of the study, this project extends the analysis across specific regions and soil conditions (soil order), to get a more comprehensive soil health assessment.
 
 # Usage
 1. Install dependencies
@@ -65,4 +61,4 @@ The coordinate data were generated using AI with the `location` column of the da
 For interpretations, the usda soil taxonomy is used as **reference** https://www.nrcs.usda.gov/resources/education-and-teaching-materials/the-twelve-orders-of-soil-taxonomy
 
 ## Dashboard
-The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries.
+The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries. ![Demo](demo.gif)
