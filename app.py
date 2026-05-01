@@ -143,8 +143,8 @@ app.layout = dbc.Container([
                 "can variates a lot depending on the soil or regional conditions"),
             html.P(" - The boxplot show that there can be a lot of variability in the distribution of the indicators " +
                 "within a level of a selcted conditions, espacially when this this level is spread across several sites"),
-            html.H4("In the tables below, the effects of the conditions and the sites on the indicators are tested for each practices combination. " +
-                    "The cells are colored based on the conditions",
+            html.H4("In the tables below, the effects of the conditions and the sites on the indicators are tested for " +
+                    "each practices combination. The cells are colored based on the conditions",
                     style={'color': 'black', 'fontSize': 15},)
         ])
     ],
