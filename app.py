@@ -18,6 +18,8 @@ df.loc[df['crop_rotation_factor'] == "Single-crop", 'crop_rotation_factor'] = '1
 df.loc[df['crop_rotation_factor'] == "2 crops ", 'crop_rotation_factor'] ='2 crops'
 df_merged = pd.merge(df, coord, on='location', how='left')
 df_merged.columns = [col.replace('-', '_') for col in df_merged.columns]
+df_merged['POX_C'] = df_merged['POX_C'].astype("float")
+df_merged['texture_class'] = df_merged['texture_class'].str.strip()
 
 # List of practices to compare
 practices = ['tillage_factor', 'crop_rotation_factor', 'drainage', 'cover_crop']
@@ -26,6 +28,13 @@ indicators = ['pH', 'OM_LOI', 'STP', 'STK', 'TOC',
        'TC', 'TN', 'POX_C', 'WAS', 'Min_C', 'WEOC', 'ACE_N']
 # List of condition factors
 conditions = ['soil_order', 'texture_class', 'state']
+styling_conditions = [
+                    {"condition" : "params.data.Condition == 'soil_order'",
+                    "style": {"backgroundColor": "lightblue"}},
+                    {"condition": "params.data.Condition == 'texture_class'",
+                    "style": {"backgroundColor": "lightgreen"}},
+                    {"condition": "params.data.Condition == 'state'",
+                    "style": {"backgroundColor": "lightyellow"}}]
 
 # Add a columns with the combination of practices for each data point
 df_merged['practices'] = df_merged[practices].apply(lambda row: '_'.join(row.values.astype(str)), axis=1)
@@ -127,6 +136,45 @@ app.layout = dbc.Container([
         style={'marginBottom': 20},
         className='bg-light'
     ),
+    dbc.Row([
+        html.Div([
+            html.P("The visuals above show that :"),
+            html.P(" - The map as well as the boxplot show that, for the same practices indicators " +
+                "can variates a lot depending on the soil or regional conditions"),
+            html.P(" - The boxplot show that there can be a lot of variability in the distribution of the indicators " +
+                "within a level of a selcted conditions, espacially when this this level is spread across several sites"),
+            html.H4("In the tables below, the effects of the conditions and the sites on the indicators are tested for each practices combination. " +
+                    "The cells are colored based on the conditions",
+                    style={'color': 'black', 'fontSize': 15},)
+        ])
+    ],
+    style={'marginBottom': 10},
+    className='bg-light'
+    ),
+    dbc.Row([
+        dbc.Col(
+            html.Div([
+                html.H4("Conditions effects tests :"),
+                dag.AgGrid(id='conditions_effects',
+                           getRowStyle={
+                               "styleConditions": styling_conditions
+                           }),
+            ]),
+            width=6
+        ),
+        dbc.Col(
+            html.Div([
+                html.H4("Site effects tests :"),
+                dag.AgGrid(id='site_effects',
+                            getRowStyle={
+                            "styleConditions": styling_conditions
+                            })
+            ]),
+            width=6
+        ),
+    ],
+    style={'marginBottom': 20},
+    className='bg-light')
 ])
 
 # Create a callback for global viasualization and analysis
@@ -139,11 +187,20 @@ app.layout = dbc.Container([
 )
 def update_global_figures(condition_choice, practice_choice, indicator_choice):
     # Return empty figures if any dropdown value is not selected yet
-    if condition_choice is None or practice_choice is None or indicator_choice is None:
+    if not condition_choice or practice_choice is None or indicator_choice is None:
         return go.Figure(), go.Figure()
 
     # Filter the merged dataframe based on the selected practice
-    dt = df_merged.loc[df_merged['practices'] == practice_choice]
+    dt = df_merged.loc[df_merged['practices'] == practice_choice].copy()
+
+    if isinstance(condition_choice, list):
+        combo_name = ' | '.join(condition_choice)
+        dt['condition_combo'] = dt[condition_choice].astype(str).agg(' | '.join, axis=1)
+        color_col = 'condition_combo'
+        title_condition = combo_name
+    else:
+        color_col = condition_choice
+        title_condition = condition_choice
 
     # Update the map
     fig_map = px.scatter_geo(
@@ -152,31 +209,29 @@ def update_global_figures(condition_choice, practice_choice, indicator_choice):
         lon='longitude',
         locationmode='USA-states',
         hover_name='location',
-        color=condition_choice,
-        size = indicator_choice
+        color=color_col,
+        size=indicator_choice
     )
     list_practices = practice_choice.split("_")
     fig_map.update_layout(
-        title = f"Map of the {len(dt.site_number.unique())} sites colored " +
-        f"depending on {condition_choice} practicing : ",
-        title_subtitle = {'text' : f"Tillage : " + list_practices[0] + "<br>" +
-                          "Crop rotation : " + list_practices[1] + "<br>" +
-                          "Drainage : " + list_practices[2] + "<br>" +
-                          "Cover crop : " + list_practices[3],
+        title=f"Map of the {len(dt.site_number.unique())} sites colored " +
+              f"depending on {title_condition} : ",
+        title_subtitle={'text': f"Tillage : " + list_practices[0] + "<br>" +
+                        "Crop rotation : " + list_practices[1] + "<br>" +
+                        "Drainage : " + list_practices[2] + "<br>" +
+                        "Cover crop : " + list_practices[3],
                         'font': {'style': 'italic'}},
-        geo = dict(
-            scope = 'usa',
-            landcolor = 'rgb(217, 217, 217)')
-        )
-    fig_map.update_traces(
-        showlegend=False
+        geo=dict(
+            scope='usa',
+            landcolor='rgb(217, 217, 217)')
     )
+    fig_map.update_traces(showlegend=False)
 
     # Update the boxplot
-    fig_box = px.box(dt, y=indicator_choice, x=condition_choice,
-                      title=f"{indicator_choice} depending on {condition_choice}",
-                      color=condition_choice)
-    
+    fig_box = px.box(dt, y=indicator_choice, x=color_col,
+                      title=f"{indicator_choice} depending on {title_condition}",
+                      color=color_col)
+
     return fig_map, fig_box
 
 # Create a callback for the modal
@@ -189,6 +244,48 @@ def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
+
+# Create callback for the grids
+@app.callback(
+    Output("conditions_effects", "columnDefs"),
+    Output("conditions_effects", "rowData"),
+    Output("site_effects", "columnDefs"),
+    Output("site_effects", "rowData"),
+    Input('practices_selector', 'value'),
+)
+def update_grids(tests_practice_choice):
+    # Filter data frame
+    data = df_merged.loc[df_merged['practices'] == tests_practice_choice]
+    # Only test the conditions with at least two levels
+    condtions_tokeep = [c for c in conditions if len(data[c].unique()) > 1]
+    
+    # Update contions effects tests :
+    df_cond = pd.DataFrame(columns= ['Condition'] + indicators)
+    for c in condtions_tokeep :
+        row_data = {'Condition': c}
+        for i in indicators :
+            test_res = global_test(data, i, c)
+            row_data[i] = pval_interp(test_res['pvalue'])
+        df_cond = df_cond._append(row_data, ignore_index=True)   
+    conditions_columnDefs = [{"field": i, "headerName": i} for i in df_cond.columns]
+    conditions_rowData = df_cond.to_dict('records')
+
+    # Update site effects tests :
+    df_site = pd.DataFrame(columns=['Condition', 'Level'] + indicators)
+    for cond in conditions :
+        list_levels = data[cond].unique()
+        for l in list_levels :
+            d = data.loc[data[cond] == l]
+            if len(d['site_number'].unique()) > 1 :
+                row_data = {'Condition': cond, 'Level': l}
+                for i in indicators :
+                    t = global_test(d, i, 'site_number')
+                    row_data[i] = pval_interp(t['pvalue'])
+                df_site = df_site._append(row_data, ignore_index=True)
+    site_columnDefs = [{"field": i, "headerName": i} for i in df_site.columns]
+    site_rowData = df_site.to_dict('records')
+
+    return conditions_columnDefs, conditions_rowData, site_columnDefs, site_rowData
 
 # Run the app
 if __name__ == '__main__':

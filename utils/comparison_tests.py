@@ -9,35 +9,34 @@ def global_test(df, trait, factor):
     ## Results to return
     res = {}
     ## Shapiro : Null hypothesis : The weights were drawn from a normal distribution
-    shapiro_test = stats.shapiro(df[trait])
+    shapiro_test = stats.shapiro(df[trait].dropna())
 
     ## Bartlett : Null hypothesis : All input samples are from populations with equal variances.
-    list_inputs = [np.array(df.loc[df[factor] == val, trait]) for val in df[factor].unique()]
+    list_inputs = [np.array(df.loc[df[factor] == val, trait].dropna()) for val in df[factor].unique()]
 
     barlett_test = stats.bartlett(*list_inputs) #En Python, * devant une liste signifie "déballer" cette liste en arguments séparés.
 
     ## Global test : Anova or Krukal-Wallis
     if (shapiro_test.pvalue <= 0.05) and (barlett_test.pvalue <= 0.05):
         # Kruskal-Wallis : Null hypothesis the population median of all of the groups are equal
-        kruskal_test = stats.kruskal(*list_inputs)
+        kruskal_test = stats.kruskal(*list_inputs, nan_policy='omit')
         res['pvalue'] = kruskal_test.pvalue
     else:
         # Anova : Null hypothesis : The means of the groups are all equal
-        anova_test = stats.f_oneway(*list_inputs)
+        anova_test = stats.f_oneway(*list_inputs, nan_policy='omit')
         res['pvalue'] = anova_test.pvalue
     return res
 
 def pval_interp(pval):
     """ Interpret the p-value of a test with conventions """
-    if pval <= 0.05 and pval > 0.01:
-        interp = "*"
-    if pval <= 0.01 and pval > 0.001:
-        interp = "**"
     if pval <= 0.001:
-        interp = "***"
+        return "***"
+    elif pval <= 0.01:
+        return "**"
+    elif pval <= 0.05:
+        return "*"
     else:
-        interp = "ns"
-    return interp
+        return "ns"
 
 def post_hoc_test(df, trait, factor):
     """ Perform a post-hoc test (Tukey or Dunn) to compare the trait of interest between
@@ -45,7 +44,7 @@ def post_hoc_test(df, trait, factor):
     ## Results to return
     res = {}
     ## Shapiro : Null hypothesis : The weights were drawn from a normal distribution
-    shapiro_test = stats.shapiro(df[trait])
+    shapiro_test = stats.shapiro(df[trait].dropna())
 
     ## Bartlett : Null hypothesis : All input samples are from populations with equal variances.
     list_inputs = [np.array(df.loc[df[factor] == val, trait]) for val in df[factor].unique()]
