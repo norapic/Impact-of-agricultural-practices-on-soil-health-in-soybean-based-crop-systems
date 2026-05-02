@@ -1,64 +1,50 @@
-This project is meant to showcase a simple dashboard using Python, synthesizing the exploratory analysis of different agricultural practices on soil health in soybean-based crop systems across different soil and regional conditions in the US.
+# Management practices and soil heath : An Interactive EDA dashboard application
+This project explores a field trials dataset using Python dashboard. The dataset used studies the impact of different agricultural practices on soil health in soybean-based crop systems across different soil and geographical conditions in the US.
+
+# Visual demo
+![Demo](demo.gif)
 
 # Description
-The study from which this project is based on (see Resources) investigates whether management practices are associated with changes in recommended soil health indicators at the 0–15 cm depth in 4 to 50 year soybean cropping system trials across the US. A total of **21 experiements** were included in the study across 17 locations in the US.
+This project is an interactive Dash application to analyze how agricultural management practices affects soil health across 17 locations in the US.
 
-## Soil health indicators
+# Key features
+## Visuals
+Identify spatial trends in soil health across the 17 locations using an **interactive bubble map**, with deep-dives into distribution variance via linked **boxplots**.
 
-The study tracks :
-  * **Chemical/Physical** : pH, organic matter loss-on-ignition (OM-LOI), total nitrogen (TN), soil test phosphorus (STP), and soil test potassium (STK).
-  * **Biological/Carbon** : Wet aggregate stability (WAS), permanganate oxidizable carbon (POXC), mineralizable carbon (Min-C), water extractable organic carbon (WEOC), total organic carbon (TOC), and soil extractable protein (ACE-N).
+## Tables
+Provide an automated statistical backend that selects between Kruskal-Wallis or One-way ANOVA based on distribution normality (tested with Shapiro-Wilk test and Barlette test), providing instant **p-value** significance for soil order and management effects.
+The **Geo and soil conditions effects** table test the effect for each condition (soil order, texture class, state) on each indicator is tested if the condition has at least 2 levels.
+The **Site effects** table the effect of the variability between sites on each indicator in tested for each condition level if they exist in at least 2 sites. (ex: if the condition is soil order, and the levels are Mollisol and Alfisol, if Mollisol is has two sites and Alfisol one site, the test will run only on Mollisol).
 
-## Management practices
+# Installation and usage
+1. Install dependencies
+```bash
+pip install dash plotly pandas
+```
+2. Download the repository
+3. Run the app
+```bash
+python app.py
+```
+A browser tab will open, displaying the dashboard.
+
+# Resources
+The data used are from the **study** https://doi.org/10.1016/j.agee.2025.109950
+Geospatial coordinates were geocoded based on the location metadata and verified against USDA site records.
+
+For interpretations, the usda soil taxonomy is used as **reference** https://www.nrcs.usda.gov/resources/education-and-teaching-materials/the-twelve-orders-of-soil-taxonomy
+
+# Data and methodology
+## Data
+### Soil health indicators
+* **Chemical/Physical** : pH, organic matter loss-on-ignition (OM-LOI), total nitrogen (TN), soil test phosphorus (STP), and soil test potassium (STK).
+* **Biological/Carbon** : Wet aggregate stability (WAS), permanganate oxidizable carbon (POXC), mineralizable carbon (Min-C), water extractable organic carbon (WEOC), total organic carbon (TOC), and soil extractable protein (ACE-N).
+
+### Management practices
 * **Crop rotation**
 * **Tillage**
 * **Cover cropping**
 * **Artificial drainage**
 
-## Goal of the project
-As suggested in the conclusion of the study, this project extends the analysis across specific regions and soil conditions (soil order), to get a more comprehensive soil health assessment.
-
-# Usage
-1. Install dependencies
-
-<div style="position: relative; border-radius: 6px; overflow: hidden; border: 1px solid #222324;">
-  <!-- Styled button -->
-  <button 
-    style="position: absolute; top: 8px; right: 8px; padding: 3px 8px; font-size: 12px; font-weight: 500; color: #f7fafd; background-color: #f6f8fa33; border: 1px solid #020202; border-radius: 4px; cursor: pointer; z-index: 1;"
-    onclick="navigator.clipboard.writeText(document.getElementById('styled-code').textContent.trim()).then(() => {this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy', 2000);})"
-  >
-  
-  </button>
-  <!-- Code block with syntax highlighting (GFM style) -->
-  <pre style="margin: 0; background-color: #212122; padding: 16px;"><code id="styled-code" style="font-family: SFMono-Regular, Consolas, monospace; color: #f6f7f7;">
-pip install Dash plotly pandas
-  </code></pre>
-</div>
-
-
-2. Download the repository
-3. Run the app
-<div style="position: relative; border-radius: 6px; overflow: hidden; border: 1px solid #222324;">
-  <!-- Styled button -->
-  <button 
-    style="position: absolute; top: 8px; right: 8px; padding: 3px 8px; font-size: 12px; font-weight: 500; color: #f7fafd; background-color: #f6f8fa33; border: 1px solid #020202; border-radius: 4px; cursor: pointer; z-index: 1;"
-    onclick="navigator.clipboard.writeText(document.getElementById('styled-code').textContent.trim()).then(() => {this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy', 2000);})"
-  >
-  
-  </button>
-  <!-- Code block with syntax highlighting (GFM style) -->
-  <pre style="margin: 0; background-color: #212122; padding: 16px;"><code id="styled-code" style="font-family: SFMono-Regular, Consolas, monospace; color: #f6f7f7;">
-python app.py
-  </code></pre>
-</div>
-
-A browser tab will open, displaying the dashboard.
-
-# Resources
-The data used are from the **study** https://doi.org/10.1016/j.agee.2025.109950
-The coordinate data were generated using AI with the `location` column of the data file as input and manually checked for accuracy.
-
-For interpretations, the usda soil taxonomy is used as **reference** https://www.nrcs.usda.gov/resources/education-and-teaching-materials/the-twelve-orders-of-soil-taxonomy
-
-## Dashboard
-The dashboard sums up the analysis in interactive, user-friendly visuals. It is built on the `app.py` script using Dash and Plotly Python libraries. ![Demo](demo.gif)
+## Methodology
+The Interactives visuals enable to see the complexity of the dataset. Agricultural field trials often suffer from unbalanced designs (e.g., specific tillage practices only tested in one soil order). This dashboard addresses this by dynamically filtering statistical tests to only those conditions with sufficient sample sizes (n≥2), preventing misleading interpretations of site-specific variance.

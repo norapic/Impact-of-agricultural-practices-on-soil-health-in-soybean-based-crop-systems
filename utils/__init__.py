@@ -1,1 +1,1 @@
-__all__ = ['comparison_tests', 'descriptive_plots']
+__all__ = ['comparison_tests']

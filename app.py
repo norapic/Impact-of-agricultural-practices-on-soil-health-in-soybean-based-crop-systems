@@ -44,6 +44,28 @@ df_readme = pd.read_excel('data/data.xlsx', sheet_name="readme" ,engine='openpyx
 df_readme.Variables = [col.replace('-', '_') for col in df_readme.Variables]
 df_info = df_readme.loc[df_readme['Variables'].isin(practices + conditions + indicators), ['Variables', 'Description', 'Unit']]
 
+# Manually create relevant pair comparions:
+list_comparison_crop_rotation = dict(
+    c1 = ["Chisel plow_1 crop_no_no", "Chisel plow_2 crops_no_no"], # For Mollisol
+    c2 = ["Conventional tillage_1 crop_no_no", "Conventional tillage_2 crop_no_no"], # For Alfisol and Mollisol
+    c3 = ["No-tillage_1 crop_no_no", "No-tillage_2 crop_no_no", "No-tillage_3 crop_no_no"], # For Alfisol and Mollisol
+    c4 = ["Moldboard plow_1 crop_no_no", "Moldboard plow_2 crop_no_no"] # For Mollisol
+)
+list_comparison_cover_crop = dict(
+    c1 = ["No-tillage_1 crop_no_no", "No-tillage_1 crop_no_yes"], # For Alfisol and Mollisol
+    c2 = ["No-tillage_2 crops_no_no", "No-tillage_2 crops_no_yes"] # For Alfisol and Mollisol
+)
+list_comparison_drainage = dict(
+    c1 = ["Conventional tillage_2 crop_no_no", "Conventional tillage_2 crop_yes_no"], # For Mollisol and Vertisol
+    c2 = ["Reduced tillage_2 crops_yes_no", "Reduced tillage_2 crops_no_no"] # For vertisol
+)
+list_comparison_tillage = dict(
+    c1 = ["No-tillage_1 crop_no_no", "Conventional tillage_1 crop_no_no"], # For Alfisol and Mollisol
+    c2 = ["No-tillage_2 crop_no_no", "Conventional tillage_2 crop_no_no"], # For Alfisol and Mollisol
+    c3 = ["Strip tillage-5 crops-no-no", "Conventional tillage-5 crops-no-no"], #For ultisol
+    c4 = ["Reduced tillage-2 crops-yes-no", "Conventional tillage-2 crops-yes-no"] #For vertisol
+)
+
 # Define external stylesheets (optional)
 external_stylesheets = [dbc.themes.MINTY]
 
@@ -54,7 +76,7 @@ app = Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = dbc.Container([
     dbc.Row(
         [
-        html.H2("Exploration of the impact of practices on soil indicators in soybean cropping systems in the US",
+        html.H2("Exploration of the impact of practices on soil health in soybean cropping systems in the US",
                     className='text-center',
                     style={'color': 'darkgreen', 'fontSize': 22, 'fontWeight': 'bold',
                             'marginBottom': 15},
@@ -65,7 +87,7 @@ app.layout = dbc.Container([
     ),
     dbc.Row([
         html.H2("The figures below allow to explore the impact of differents agricultural practices on soil " +
-                " indicators in soybean cropping systems in the US.",
+                " indicators in soybean cropping systems in the US, depending on soil and geo conditions.",
                 style={'color': 'black', 'fontSize': 19},
         ),
         html.Div([
@@ -90,11 +112,11 @@ app.layout = dbc.Container([
                 scrollable=True,
                 ),
             html.P(" - The map on the left shows the location of the sites having the same practices, " +
-                    "colored depending on regional or soil conditions factor (soil order, soil texture " +
-                    "type and state where the site is located)" +
+                    "colored depending on geo or soil conditions factor (soil order, soil texture " +
+                    "class and state)" +
                     " and with a size depending on the value of the selected indicator."),
             html.P(" - The boxplot on the right shows the distribution of the selected indicator depending on " + 
-                "the regional or soil condition factor."),
+                "the geo or soil condition factor."),
         ])
         ],
         style={'marginBottom': 10},
@@ -139,8 +161,8 @@ app.layout = dbc.Container([
     dbc.Row([
         html.Div([
             html.P("The visuals above show that :"),
-            html.P(" - The map as well as the boxplot show that, for the same practices indicators " +
-                "can variates a lot depending on the soil or regional conditions"),
+            html.P(" - The map as well as the boxplot show that, for the same combination of practices, indicators " +
+                "can variates a lot depending on the soil or geo conditions"),
             html.P(" - The boxplot show that there can be a lot of variability in the distribution of the indicators " +
                 "within a level of a selcted conditions, espacially when this this level is spread across several sites"),
             html.H4("In the tables below, the effects of the conditions and the sites on the indicators are tested for " +
@@ -286,6 +308,8 @@ def update_grids(tests_practice_choice):
     site_rowData = df_site.to_dict('records')
 
     return conditions_columnDefs, conditions_rowData, site_columnDefs, site_rowData
+
+# 
 
 # Run the app
 if __name__ == '__main__':
