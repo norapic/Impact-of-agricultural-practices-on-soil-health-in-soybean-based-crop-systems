@@ -47,4 +47,4 @@ For interpretations, the usda soil taxonomy is used as **reference** https://www
 * **Artificial drainage**
 
 ## Methodology
-The Interactives visuals enable to see the complexity of the dataset. Agricultural field trials often suffer from unbalanced designs (e.g., specific tillage practices only tested in one soil order). This dashboard addresses this by dynamically filtering statistical tests to only those conditions with sufficient sample sizes (n≥2), preventing misleading interpretations of site-specific variance.
+Agricultural field trials often suffer from unbalanced designs (e.g., specific tillage practices only tested in one soil order). This dashboard addresses this by dynamically filtering statistical tests to only those conditions with sufficient sample sizes (n≥2), preventing misleading interpretations of site-specific variance.
