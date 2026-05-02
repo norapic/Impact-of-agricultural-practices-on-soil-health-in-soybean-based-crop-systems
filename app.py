@@ -1,25 +1,11 @@
 from dash import Dash, html, dcc, Input, Output, State, dash_table, callback
 import plotly.express as px
 import pandas as pd
-import openpyxl
+import numpy as np
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import dash_ag_grid as dag
-from utils.desciptive_plots import *
 from utils.comparison_tests import *
-
-# Load the data for anamlysis and visualization
-df = pd.read_excel('data/data.xlsx', sheet_name="meta" ,engine='openpyxl')
-coord = pd.read_excel('data/coord.xlsx', engine='openpyxl')
-
-# Clean and transform the data
-coord.columns = ['location', 'latitude', 'longitude']
-df.loc[df['crop_rotation_factor'] == "Single-crop", 'crop_rotation_factor'] = '1 crop'
-df.loc[df['crop_rotation_factor'] == "2 crops ", 'crop_rotation_factor'] ='2 crops'
-df_merged = pd.merge(df, coord, on='location', how='left')
-df_merged.columns = [col.replace('-', '_') for col in df_merged.columns]
-df_merged['POX_C'] = df_merged['POX_C'].astype("float")
-df_merged['texture_class'] = df_merged['texture_class'].str.strip()
 
 # List of practices to compare
 practices = ['tillage_factor', 'crop_rotation_factor', 'drainage', 'cover_crop']
@@ -36,35 +22,9 @@ styling_conditions = [
                     {"condition": "params.data.Condition == 'state'",
                     "style": {"backgroundColor": "lightyellow"}}]
 
-# Add a columns with the combination of practices for each data point
-df_merged['practices'] = df_merged[practices].apply(lambda row: '_'.join(row.values.astype(str)), axis=1)
-
-# Load data for the modal
-df_readme = pd.read_excel('data/data.xlsx', sheet_name="readme" ,engine='openpyxl')
-df_readme.Variables = [col.replace('-', '_') for col in df_readme.Variables]
-df_info = df_readme.loc[df_readme['Variables'].isin(practices + conditions + indicators), ['Variables', 'Description', 'Unit']]
-
-# Manually create relevant pair comparions:
-list_comparison_crop_rotation = dict(
-    c1 = ["Chisel plow_1 crop_no_no", "Chisel plow_2 crops_no_no"], # For Mollisol
-    c2 = ["Conventional tillage_1 crop_no_no", "Conventional tillage_2 crop_no_no"], # For Alfisol and Mollisol
-    c3 = ["No-tillage_1 crop_no_no", "No-tillage_2 crop_no_no", "No-tillage_3 crop_no_no"], # For Alfisol and Mollisol
-    c4 = ["Moldboard plow_1 crop_no_no", "Moldboard plow_2 crop_no_no"] # For Mollisol
-)
-list_comparison_cover_crop = dict(
-    c1 = ["No-tillage_1 crop_no_no", "No-tillage_1 crop_no_yes"], # For Alfisol and Mollisol
-    c2 = ["No-tillage_2 crops_no_no", "No-tillage_2 crops_no_yes"] # For Alfisol and Mollisol
-)
-list_comparison_drainage = dict(
-    c1 = ["Conventional tillage_2 crop_no_no", "Conventional tillage_2 crop_yes_no"], # For Mollisol and Vertisol
-    c2 = ["Reduced tillage_2 crops_yes_no", "Reduced tillage_2 crops_no_no"] # For vertisol
-)
-list_comparison_tillage = dict(
-    c1 = ["No-tillage_1 crop_no_no", "Conventional tillage_1 crop_no_no"], # For Alfisol and Mollisol
-    c2 = ["No-tillage_2 crop_no_no", "Conventional tillage_2 crop_no_no"], # For Alfisol and Mollisol
-    c3 = ["Strip tillage-5 crops-no-no", "Conventional tillage-5 crops-no-no"], #For ultisol
-    c4 = ["Reduced tillage-2 crops-yes-no", "Conventional tillage-2 crops-yes-no"] #For vertisol
-)
+# Load data
+dataset = pd.read_parquet("data/dataset.gzip")
+df_info = pd.read_parquet("data/info.gzip")
 
 # Define external stylesheets (optional)
 external_stylesheets = [dbc.themes.MINTY]
@@ -91,7 +51,7 @@ app.layout = dbc.Container([
                 style={'color': 'black', 'fontSize': 19},
         ),
         html.Div([
-            html.H4("Practices are displayed are discribed as follow : Tillage_Crop rotation_Drainage_Cover crop." +
+            html.H4("Practices are displayed are discribed as follow : Tillage | Crop rotation | Drainage | Cover crop." +
                     "See `Details` button for more information",
                     style={'color': 'black', 'fontSize': 15},),
             dcc.Button("Details", id="open", n_clicks=0),
@@ -126,7 +86,7 @@ app.layout = dbc.Container([
         dbc.Col(
             dcc.Dropdown(
                 id='practices_selector',
-                options=[{"label": v, "value": v} for v in np.sort(df_merged['practices'].unique())],
+                options=[{"label": v.replace("_", " | "), "value": v} for v in np.sort(dataset['practices'].unique())],
                 placeholder="Select practice"
             ),
             width=3
@@ -213,7 +173,7 @@ def update_global_figures(condition_choice, practice_choice, indicator_choice):
         return go.Figure(), go.Figure()
 
     # Filter the merged dataframe based on the selected practice
-    dt = df_merged.loc[df_merged['practices'] == practice_choice].copy()
+    dt = dataset.loc[dataset['practices'] == practice_choice].copy()
 
     if isinstance(condition_choice, list):
         combo_name = ' | '.join(condition_choice)
@@ -277,23 +237,26 @@ def toggle_modal(n1, n2, is_open):
 )
 def update_grids(tests_practice_choice):
     # Filter data frame
-    data = df_merged.loc[df_merged['practices'] == tests_practice_choice]
+    data = dataset.loc[dataset['practices'] == tests_practice_choice]
     # Only test the conditions with at least two levels
     condtions_tokeep = [c for c in conditions if len(data[c].unique()) > 1]
     
     # Update contions effects tests :
     df_cond = pd.DataFrame(columns= ['Condition'] + indicators)
+    results_list = []
     for c in condtions_tokeep :
         row_data = {'Condition': c}
         for i in indicators :
             test_res = global_test(data, i, c)
             row_data[i] = pval_interp(test_res['pvalue'])
-        df_cond = df_cond._append(row_data, ignore_index=True)   
+        results_list.append(row_data)
+    df_cond = pd.DataFrame(results_list)
     conditions_columnDefs = [{"field": i, "headerName": i} for i in df_cond.columns]
     conditions_rowData = df_cond.to_dict('records')
 
     # Update site effects tests :
     df_site = pd.DataFrame(columns=['Condition', 'Level'] + indicators)
+    results_list = []
     for cond in conditions :
         list_levels = data[cond].unique()
         for l in list_levels :
@@ -303,7 +266,8 @@ def update_grids(tests_practice_choice):
                 for i in indicators :
                     t = global_test(d, i, 'site_number')
                     row_data[i] = pval_interp(t['pvalue'])
-                df_site = df_site._append(row_data, ignore_index=True)
+                results_list.append(row_data)
+    df_site = pd.DataFrame(results_list)
     site_columnDefs = [{"field": i, "headerName": i} for i in df_site.columns]
     site_rowData = df_site.to_dict('records')
 
