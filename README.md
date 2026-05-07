@@ -13,8 +13,8 @@ Identify spatial trends in soil health across the 17 locations using an **intera
 
 ## Tables
 Provide an automated statistical backend that selects between Kruskal-Wallis or One-way ANOVA based on distribution normality (tested with Shapiro-Wilk test and Barlette test), providing instant **p-value** significance for soil order and management effects.
-The **Geo and soil conditions effects** table test the effect for each condition (soil order, texture class, state) on each indicator is tested if the condition has at least 2 levels.
-The **Site effects** table the effect of the variability between sites on each indicator in tested for each condition level if they exist in at least 2 sites. (ex: if the condition is soil order, and the levels are Mollisol and Alfisol, if Mollisol is has two sites and Alfisol one site, the test will run only on Mollisol).
+- The **Geo and soil conditions effects** table tests the effects of each condition (soil order, texture class, state) on each indicator, if the condition has at least 2 levels.
+- The **Site effects** table tests the effects of the variability between sites on each indicator for each condition level, if the level has at least 2 sites. (ex: if the condition is soil order, and the levels are Mollisol and Alfisol, if Mollisol has two sites and Alfisol one site, the test will be performed on Mollisol).
 
 # Installation and usage
 1. Install dependencies
